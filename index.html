@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Construction Accounts - Executive Dashboard</title>
+<link rel="stylesheet" href="css/bootstrap.min.css">
+<link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+<header class="app-nav">
+  <div class="container-fluid d-flex flex-wrap align-items-center justify-content-between py-2 px-3 px-lg-4">
+    <div><div class="brand">Eastern Railway &middot; Construction Organisation</div><div class="sub">Accounts Executive Dashboard</div></div>
+    <div class="d-flex align-items-center gap-3"><div class="asof">Position as on <strong id="asOn">-</strong></div><a class="btn btn-sm btn-outline-light" href="update.html">Update data</a></div>
+  </div>
+</header>
+<main class="container-fluid px-3 px-lg-4 py-3">
+  <div id="loadErr" class="alert alert-danger d-none"></div>
+  <section class="row g-3 mb-3" id="kpis"></section>
+
+  <h2 class="sec-title">Expenditure</h2>
+  <section class="row g-3 mb-3">
+    <div class="col-xl-5"><div class="card h-100"><div class="card-header">Section-wise: ORG vs cumulative expenditure <span class="hint">click a bar</span></div><div class="card-body chart-box"><canvas id="cSec"></canvas></div></div></div>
+    <div class="col-xl-7"><div class="card h-100"><div class="card-header">Plan-head-wise cumulative expenditure (Rs. Cr) <span class="hint">click a bar</span></div><div class="card-body chart-box"><canvas id="cPh"></canvas></div></div></div>
+  </section>
+  <section class="row g-3 mb-3">
+    <div class="col-12"><div class="card"><div class="card-header">Top works by expenditure, Apr-Sep'26 <span class="hint">click a row</span></div><div class="table-responsive"><table class="table table-hover table-sm align-middle mb-0" id="tWorks"></table></div></div></div>
+  </section>
+
+  <h2 class="sec-title">File pendency (weekly position)</h2>
+  <section class="row g-3 mb-3">
+    <div class="col-xl-7"><div class="card h-100"><div class="card-header">Section-wise movement <span class="hint">click a bar</span></div><div class="card-body chart-box"><canvas id="cFile"></canvas></div></div></div>
+    <div class="col-xl-5"><div class="card h-100"><div class="card-header">Closing balance by section <span class="hint">click a row</span></div><div class="table-responsive"><table class="table table-hover table-sm mb-0" id="tFile"></table></div></div></div>
+  </section>
+
+  <h2 class="sec-title">Audit</h2>
+  <section class="row g-3 mb-3">
+    <div class="col-xl-5"><div class="card h-100"><div class="card-header">Outstanding by nature of audit <span class="hint">click a slice</span></div><div class="card-body chart-box"><canvas id="cAud"></canvas></div></div></div>
+    <div class="col-xl-7"><div class="card h-100"><div class="card-header">Audit summary <span class="hint">click a row</span></div><div class="table-responsive"><table class="table table-hover table-sm mb-0" id="tAud"></table></div></div></div>
+  </section>
+
+  <h2 class="sec-title">Railway Board Inspection Report (Part-I)</h2>
+  <section class="row g-3 mb-4">
+    <div class="col-xl-4"><div class="card h-100"><div class="card-header">Pending paras by section <span class="hint">click a bar</span></div><div class="card-body chart-box"><canvas id="cRb"></canvas></div></div></div>
+    <div class="col-xl-8"><div class="card h-100"><div class="card-header">Pending paras <span class="hint">click a row</span></div><div class="table-responsive tbl-scroll"><table class="table table-hover table-sm align-middle mb-0" id="tRb"></table></div></div></div>
+  </section>
+</main>
+<footer class="app-foot">Construction Accounts &middot; figures in Rs. crore unless stated &middot; source: departmental Excel returns</footer>
+
+<div class="modal fade" id="drill" tabindex="-1"><div class="modal-dialog modal-xl modal-dialog-scrollable"><div class="modal-content">
+  <div class="modal-header"><div><h5 class="modal-title" id="dTitle"></h5><ol class="breadcrumb mb-0 mt-1" id="dCrumb"></ol></div><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+  <div class="modal-body">
+    <div class="row g-2 mb-3" id="dKpi"></div>
+    <div class="row g-3">
+      <div class="col-lg-5" id="dChartCol"><div class="chart-box-sm"><canvas id="dChart"></canvas></div></div>
+      <div class="col" id="dTblCol"><div class="table-responsive tbl-scroll"><table class="table table-hover table-sm align-middle mb-0" id="dTable"></table></div></div>
+    </div>
+    <div id="dText" class="mt-3"></div>
+  </div>
+</div></div></div>
+<script src="js/jquery.min.js"></script>
+<script src="js/bootstrap.bundle.min.js"></script>
+<script src="js/chart.umd.js"></script>
+<script src="js/dashboard.js"></script>
+</body>
+</html>

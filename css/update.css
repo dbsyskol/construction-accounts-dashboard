@@ -1,0 +1,4 @@
+.dropzone{display:flex;flex-direction:column;align-items:center;gap:.25rem;padding:1.6rem 1rem;border:2px dashed #b9c8de;border-radius:.6rem;background:#f8fafd;cursor:pointer;color:var(--ink);text-align:center;transition:.15s}
+.dropzone span{font-size:.78rem;color:var(--muted)}
+.dropzone:hover,.dropzone.over{border-color:var(--blue);background:#eaf1fd}
+.table.nohover tbody tr{cursor:default}

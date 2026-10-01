@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Update Data - Construction Accounts Dashboard</title>
+<link rel="stylesheet" href="css/bootstrap.min.css">
+<link rel="stylesheet" href="css/dashboard.css">
+<link rel="stylesheet" href="css/update.css">
+</head>
+<body>
+<header class="app-nav">
+  <div class="container-fluid d-flex flex-wrap align-items-center justify-content-between py-2 px-3 px-lg-4">
+    <div><div class="brand">Eastern Railway &middot; Construction Organisation</div><div class="sub">Data preparation &middot; dashboard.json</div></div>
+    <a class="btn btn-sm btn-outline-light" href="index.html">&larr; Back to dashboard</a>
+  </div>
+</header>
+<main class="container-xl px-3 py-3">
+  <div id="baseMsg" class="alert alert-info small"></div>
+  <div class="row g-3">
+    <div class="col-lg-7">
+      <div class="card mb-3"><div class="card-header">1. Upload Excel files <span class="hint">.xlsx / .xls &middot; any number, any order</span></div>
+        <div class="card-body">
+          <label class="dropzone" id="drop" for="pick"><strong>Drop the Excel files here</strong><span>or click to browse (PH-wise, Work-wise, File Pending, Audit, Railway Board Inspection)</span></label>
+          <input type="file" id="pick" class="d-none" multiple accept=".xlsx,.xls">
+          <table class="table table-sm mt-3 nohover" id="fList"></table>
+          <p class="small text-muted mb-0">Only the files you upload are replaced. Everything else is kept from the current <code>data/dashboard.json</code>.</p>
+        </div></div>
+      <div class="card"><div class="card-header">2. Or enter directly (forms)</div>
+        <div class="card-body">
+          <h6>Audit line</h6>
+          <div class="row g-2 mb-2" id="fAud">
+            <div class="col-12 col-md-4"><input class="form-control form-control-sm" data-f="n" placeholder="Nature of audit"></div>
+            <div class="col-3 col-md"><input type="number" class="form-control form-control-sm" data-f="ob" placeholder="Opening"></div>
+            <div class="col-3 col-md"><input type="number" class="form-control form-control-sm" data-f="acc" placeholder="Accrued"></div>
+            <div class="col-3 col-md"><input type="number" class="form-control form-control-sm" data-f="clo" placeholder="Closed"></div>
+            <div class="col-3 col-md-auto"><button class="btn btn-sm btn-primary w-100" id="addAud">Add</button></div>
+          </div>
+          <hr>
+          <h6>Railway Board Inspection para</h6>
+          <div class="row g-2" id="fRb">
+            <div class="col-4 col-md-2"><input class="form-control form-control-sm" data-f="para" placeholder="Para"></div>
+            <div class="col-8 col-md-4"><input class="form-control form-control-sm" data-f="sec" placeholder="Section"></div>
+            <div class="col-12 col-md-3"><input type="date" class="form-control form-control-sm" data-f="since"></div>
+            <div class="col-12"><textarea class="form-control form-control-sm" rows="2" data-f="rem" placeholder="Audit remarks"></textarea></div>
+            <div class="col-12"><textarea class="form-control form-control-sm" rows="2" data-f="sect" placeholder="Sectional remarks (optional)"></textarea></div>
+            <div class="col-12"><button class="btn btn-sm btn-primary" id="addRb">Add para</button></div>
+          </div>
+          <div class="tbl-scroll mt-3"><table class="table table-sm nohover" id="mList"></table></div>
+        </div></div>
+    </div>
+    <div class="col-lg-5">
+      <div class="card mb-3"><div class="card-header">3. Position date</div>
+        <div class="card-body"><input type="date" id="asOnIn" class="form-control"><div class="small text-muted mt-1">Shown as "Position as on" on the dashboard.</div></div></div>
+      <div class="card"><div class="card-header">4. Generate</div>
+        <div class="card-body">
+          <button class="btn btn-success w-100 mb-2" id="gen">Generate dashboard.json</button>
+          <table class="table table-sm nohover mb-3" id="sum"></table>
+          <a class="btn btn-outline-primary w-100 disabled" id="dl" download="dashboard.json">Download dashboard.json</a>
+          <p class="small text-muted mt-2 mb-0">Copy the downloaded file into the dashboard's <code>data</code> folder (replace the old one) and refresh the dashboard.</p>
+        </div></div>
+    </div>
+  </div>
+</main>
+<script src="js/jquery.min.js"></script>
+<script src="js/xlsx.full.min.js"></script>
+<script src="js/parser.js"></script>
+<script src="js/update.js"></script>
+</body>
+</html>
