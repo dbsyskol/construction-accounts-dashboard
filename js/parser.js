@@ -73,13 +73,17 @@
     function parseFiles(wb) {
       var w = find(wb, /WEEKLY/i), e = find(wb, /^Executive/i), res = {};
       if (w) {
-        var secs = [], sec = null;
+        var secs = [], sec = null, last = '';
         w.forEach(function (r) {
-          var a = cl(r[0]);
-          if (/Section$/.test(a)) { sec = { name: a.replace(' Section', ''), rows: [] }; secs.push(sec); }
-          else if (sec && /^\d+(\.0)?$/.test(a) && r[1] != null && [2, 3, 4, 5].some(function (j) { return r[j] != null; }))
-            sec.rows.push({ by: cl(r[1]), ob: num(r[2]), acc: num(r[3]), clr: num(r[4]), cb: num(r[5]), type: cl(r[6]).slice(0, 60) });
-          else if (sec && cl(r[1]) === 'Total') sec.tot = { ob: num(r[2]), acc: num(r[3]), clr: num(r[4]), cb: num(r[5]) };
+          var a = cl(r[0]), nm = cl(r[1]), hasNum = [2, 3, 4, 5].some(function (j) { return r[j] != null; });
+          if (/Section$/.test(a)) { sec = { name: a.replace(' Section', ''), rows: [] }; secs.push(sec); last = ''; }
+          else if (sec && /^total$/i.test(nm)) sec.tot = { ob: num(r[2]), acc: num(r[3]), clr: num(r[4]), cb: num(r[5]) };
+          else if (sec && hasNum && (/^\d+(\.0)?$/.test(a) || nm) && !/^by name$/i.test(nm)) {
+            if (nm) last = nm; else nm = last;
+            var ex = sec.rows.filter(function (x) { return x.by === nm; })[0], ty = cl(r[6]);
+            if (ex) { ex.ob += num(r[2]); ex.acc += num(r[3]); ex.clr += num(r[4]); ex.cb += num(r[5]); if (ty && ex.type.indexOf(ty) < 0) ex.type = (ex.type + '; ' + ty).slice(0, 60); }
+            else sec.rows.push({ by: nm, ob: num(r[2]), acc: num(r[3]), clr: num(r[4]), cb: num(r[5]), type: ty.slice(0, 60) });
+          }
         });
         res.files = secs;
       }
@@ -98,7 +102,11 @@
 
     function parseAudit(wb) {
       var g = grid(wb.Sheets[wb.SheetNames[0]]), out = [];
-      for (var i = 2; i < g.length; i++) if (g[i][0] != null) out.push({ n: String(g[i][0]).trim(), ob: num(g[i][1]), acc: num(g[i][2]), tot: num(g[i][3]), clo: num(g[i][4]) + num(g[i][5]), cb: num(g[i][7]) });
+      for (var i = 2; i < g.length; i++) {
+        var r = g[i], o = r[0] != null ? 0 : 1, n = r[o];
+        if (typeof n !== 'string' || !n.trim()) continue;
+        out.push({ n: n.trim(), ob: num(r[o + 1]), acc: num(r[o + 2]), tot: num(r[o + 3]), clo: num(r[o + 4]) + num(r[o + 5]), cb: num(r[o + 7]) });
+      }
       return out;
     }
     function parseRb(wb) {

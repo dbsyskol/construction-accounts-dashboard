@@ -1,5 +1,6 @@
 $(function () {
   var D, charts = {}, PAL = ['#1f6feb', '#178a63', '#d98a0b', '#c9423f', '#7b57c9', '#12a4c4', '#e0702a', '#6b7a90'];
+  var PIE = ['#1f6feb', '#178a63', '#d98a0b', '#c9423f', '#7b57c9', '#12a4c4', '#e0702a', '#6b7a90', '#d6336c', '#8a9a1b', '#0b7285', '#5f3dc4', '#a0522d', '#2f9e44'];
   var MON = ['Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'];
   var f2 = function (v) { return (v || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); };
   var f0 = function (v) { return (v || 0).toLocaleString('en-IN'); };
@@ -72,7 +73,7 @@ $(function () {
   function vWorks(h) {
     var W = h.works, top = W.slice(0, 10);
     return { title: 'PH-' + h.ph + ' ' + h.name + ' - Works', kpis: [['ORG', f2(h.org)], ['Cumulative', f2(h.cum), 'g'], ['Fund heads', h.funds.length], ['Works listed', W.length]],
-      chart: { type: 'bar', data: { labels: top.map(function (w) { return clip(w.name, 28); }), datasets: [{ label: 'Apr-Sep\'26 (Rs. Cr)', data: top.map(function (w) { return +sum(w.m).toFixed(2); }), backgroundColor: PAL[1] }] }, options: { indexAxis: 'y', plugins: { legend: { display: false } } } },
+      chart: { type: 'bar', data: { labels: top.map(function (w) { return clip(w.name, 28); }), datasets: [{ label: 'Apr-Sep\'26 (Rs. Cr)', data: top.map(function (w) { return +sum(w.m).toFixed(2); }), backgroundColor: PIE[1] }] }, options: { indexAxis: 'y', plugins: { legend: { display: false } } } },
       onChart: function (i) { push(clip(top[i].name, 24), function () { return vWork(top[i]); }); },
       head: '<th>Work</th><th class="num">Sanct.</th><th class="num">Outlay</th><th class="num">Apr-Sep</th>',
       rows: W.length ? W.map(function (w) { return '<td>' + esc(clip((w.pb ? w.pb + ' | ' : '') + w.name, 70)) + '</td><td class="num">' + f2(w.sanc) + '</td><td class="num">' + f2(w.outlay) + '</td><td class="num">' + f2(sum(w.m)) + '</td>'; }) : ['<td class="text-muted">No work-wise data for this head</td>'],
@@ -80,9 +81,9 @@ $(function () {
   }
   function vWork(w) {
     return { title: (w.pb ? w.pb + ' - ' : '') + w.name, kpis: [['Fund', esc(w.fund || '-')], ['Sanctioned cost', f2(w.sanc)], ['Exp. to Mar\'26', f2(w.exp)], ['Outlay 2026-27', f2(w.outlay), 'a'], ['Apr-Sep\'26', f2(sum(w.m)), 'g'], ['2026-27 approx.', f2(w.yr)]],
-      chart: { type: 'bar', data: { labels: MON, datasets: [{ label: 'Monthly expenditure (Rs. Cr)', data: w.m, backgroundColor: PAL[0] }] }, options: { plugins: { legend: { display: false } } } } };
+      chart: { type: 'bar', data: { labels: MON, datasets: [{ label: 'Monthly expenditure (Rs. Cr)', data: w.m, backgroundColor: PIE[0] }] }, options: { plugins: { legend: { display: false } } } } };
   }
-  function barCfg(lab, ds) { return { type: 'bar', data: { labels: lab.map(function (l) { return clip(l, 26); }), datasets: ds.map(function (d, i) { return { label: d[0], data: d[1], backgroundColor: PAL[i] }; }) } }; }
+  function barCfg(lab, ds) { return { type: 'bar', data: { labels: lab.map(function (l) { return clip(l, 26); }), datasets: ds.map(function (d, i) { return { label: d[0], data: d[1], backgroundColor: PIE[i] }; }) } }; }
 
   /* ---------- file views ---------- */
   function key(nm) {
@@ -110,7 +111,7 @@ $(function () {
     var k = key(r.by), L = D.pending.filter(function (p) { return key(p.name) === k; }), g = {};
     L.forEach(function (p) { g[p.grp || 'Other'] = (g[p.grp || 'Other'] || 0) + 1; });
     return { title: 'Pending files - ' + r.by, kpis: [['Opening', r.ob], ['Accretion', r.acc, 'a'], ['Clearance', r.clr, 'g'], ['Closing', r.cb, 'r']],
-      chart: L.length ? { type: 'doughnut', data: { labels: Object.keys(g), datasets: [{ data: Object.keys(g).map(function (x) { return g[x]; }), backgroundColor: PAL }] } } : null,
+      chart: L.length ? { type: 'doughnut', data: { labels: Object.keys(g), datasets: [{ data: Object.keys(g).map(function (x) { return g[x]; }), backgroundColor: PIE }] } } : null,
       head: '<th>Description</th><th>Dept.</th><th>Received</th><th>Status</th>',
       rows: L.length ? L.map(function (p) { return '<td>' + esc(p.desc) + '<div class="small text-muted">' + esc(p.file) + '</div></td><td>' + esc(p.dept) + '</td><td>' + esc(p.rcvd) + '</td><td>' + esc(p.status) + '</td>'; }) : ['<td class="text-muted">No file-level list available for this officer.</td>'] };
   }
@@ -161,13 +162,13 @@ $(function () {
       function (i) { open([{ l: 'Sections', f: vFileSecs }, { l: FSL[i].name, f: function () { return vOfficers(FSL[i]); } }]); });
 
     var AM = A.filter(function (a) { return !isTot(a.n) && a.cb > 0; });
-    draw('cAud', { type: 'doughnut', data: { labels: AM.map(function (a) { return a.n; }), datasets: [{ data: AM.map(function (a) { return a.cb; }), backgroundColor: PAL }] }, options: { cutout: '58%' } }, function (i) { open([{ l: AM[i].n, f: function () { return vAudit(AM[i]); } }]); });
+    draw('cAud', { type: 'doughnut', data: { labels: AM.map(function (a) { return a.n; }), datasets: [{ data: AM.map(function (a) { return a.cb; }), backgroundColor: PIE }] }, options: { cutout: '58%' } }, function (i) { open([{ l: AM[i].n, f: function () { return vAudit(AM[i]); } }]); });
     tbl('#tAud', '<th>Nature</th><th class="num">OB</th><th class="num">Accrued</th><th class="num">Closed</th><th class="num">Closing</th>', A.map(function (a) { return '<td class="' + (isTot(a.n) ? 'fw-bold' : '') + '">' + esc(a.n) + '</td><td class="num">' + a.ob + '</td><td class="num">' + a.acc + '</td><td class="num">' + a.clo + '</td><td class="num fw-bold">' + a.cb + '</td>'; }),
       function (i) { open([{ l: A[i].n, f: function () { return vAudit(A[i]); } }]); });
 
     var RS = {}; D.rb.forEach(function (r) { RS[r.sec] = (RS[r.sec] || 0) + 1; });
     var RK = Object.keys(RS);
-    draw('cRb', { type: 'bar', data: { labels: RK, datasets: [{ data: RK.map(function (k) { return RS[k]; }), backgroundColor: PAL[3] }] }, options: { indexAxis: 'y', plugins: { legend: { display: false } } } }, function (i) {
+    draw('cRb', { type: 'bar', data: { labels: RK, datasets: [{ data: RK.map(function (k) { return RS[k]; }), backgroundColor: PIE[3] }] }, options: { indexAxis: 'y', plugins: { legend: { display: false } } } }, function (i) {
       var L = D.rb.filter(function (r) { return r.sec === RK[i]; });
       open([{ l: 'RB Inspection - ' + RK[i], f: function () { return { title: 'Paras pending with ' + RK[i], kpis: [['Paras', L.length, 'r']], head: '<th>Para</th><th>Since</th><th>Remarks</th>', rows: L.map(function (r) { return '<td>' + esc(r.para) + '</td><td>' + esc(r.since) + '</td><td class="small">' + esc(clip(r.rem, 120)) + '</td>'; }), onRow: function (j) { push('Para ' + L[j].para, function () { return vRb(L[j]); }); } }; } }]);
     });
