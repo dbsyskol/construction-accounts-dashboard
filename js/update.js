@@ -1,6 +1,6 @@
 $(function () {
   var P = DashParser(XLSX), D = { asOn: '', exp: [], files: [], pending: [], audit: [], rb: [] }, wbs = {}, FL = [];
-  var LBL = { exp: 'Expenditure (PH-wise)', works: 'Work-wise', files: 'File pendency', audit: 'Audit', rb: 'Railway Board Inspection' };
+  var LBL = { template: 'Input template (all sheets)', exp: 'Expenditure (PH-wise)', works: 'Work-wise', files: 'File pendency', audit: 'Audit', rb: 'Railway Board Inspection' };
   var esc = function (s) { return $('<i>').text(s == null ? '' : s).html(); };
   var iso = function (dmy) { var m = /^(\d\d)\.(\d\d)\.(\d{4})$/.exec(dmy || ''); return m ? m[3] + '-' + m[2] + '-' + m[1] : ''; };
 
@@ -61,17 +61,20 @@ $(function () {
   /* ----- generate ----- */
   $('#gen').on('click', function () {
     try {
+      var tn = [];
+      if (wbs.template) tn = P.parseTemplate(wbs.template, D);
       if (wbs.exp) {
         var old = {}; D.exp.forEach(function (s) { s.heads.forEach(function (h) { old[s.code + '|' + h.ph] = h.works; }); });
         D.exp = P.parseExp(wbs.exp);
+        D.labels = P.parseLabels(wbs.exp) || D.labels;
         D.exp.forEach(function (s) { s.heads.forEach(function (h) { h.works = old[s.code + '|' + h.ph] || []; }); });
       }
       if (wbs.works) P.attachWorks(wbs.works, D.exp);
       if (wbs.files) { var r = P.parseFiles(wbs.files); if (r.files) D.files = r.files; if (r.pending) D.pending = r.pending; }
       if (wbs.audit) D.audit = P.parseAudit(wbs.audit);
       if (wbs.rb) D.rb = P.parseRb(wbs.rb);
-      wbs = {}; FL.forEach(function (r) { r.done = 1; });
-      var d = $('#asOnIn').val(); if (d) D.asOn = d.slice(8) + '.' + d.slice(5, 7) + '.' + d.slice(0, 4);
+      $('#asOnIn').val(iso(D.asOn)); wbs = {}; FL.forEach(function (r) { r.done = 1; });
+      var d = $('#asOnIn').val(); if (d && tn.indexOf('Position date') < 0) D.asOn = d.slice(8) + '.' + d.slice(5, 7) + '.' + d.slice(0, 4);
       var nw = 0; D.exp.forEach(function (s) { s.heads.forEach(function (h) { nw += h.works.length; }); });
       $('#sum').html([['Position as on', D.asOn], ['Expenditure sections', D.exp.length], ['Works', nw], ['File sections', D.files.length], ['Pending files listed', D.pending.length], ['Audit lines', D.audit.length], ['RB inspection paras', D.rb.length]]
         .map(function (x) { return '<tr><td>' + x[0] + '</td><td class="text-end fw-bold">' + esc(x[1]) + '</td></tr>'; }).join(''));

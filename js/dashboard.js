@@ -8,6 +8,10 @@ $(function () {
   var sum = function (a, k) { return a.reduce(function (t, x) { return t + (k ? x[k] : x); }, 0); };
   var esc = function (s) { return $('<i>').text(s == null ? '' : s).html(); };
   var clip = function (s, n) { return s.length > n ? s.slice(0, n - 2) + '..' : s; };
+  var LB = function () { return $.extend({ month: 'Current month', ly: 'Last year (same period)', lyFull: '2025-26' }, D.labels || {}); };
+  var yoy = function (c, l) { return l > 0 ? Math.round((c - l) / l * 1000) / 10 : null; };
+  var yoyTxt = function (c, l) { var y = yoy(c, l); return y == null ? '-' : (y > 0 ? '+' : '') + y + '%'; };
+  var yoyCls = function (c, l) { var y = yoy(c, l); return y == null ? '' : y >= 0 ? 'text-success' : 'text-danger'; };
   Chart.defaults.font.family = '"Segoe UI",system-ui,Arial,sans-serif';
   Chart.defaults.plugins.legend.position = 'bottom';
   Chart.defaults.plugins.legend.labels.usePointStyle = true;
@@ -54,26 +58,26 @@ $(function () {
   /* ---------- expenditure views ---------- */
   function vSections() {
     var S = D.exp;
-    return { title: 'Expenditure - Sections', kpis: [['ORG 2026-27', f2(sum(S, 'org'))], ['Cumulative', f2(sum(S, 'cum')), 'g'], ['% on ORG', pct(sum(S, 'cum'), sum(S, 'org')) + '%', 'a'], ['Sep\'26', f2(sum(S, 'sep'))]],
-      chart: barCfg(S.map(function (s) { return s.code + ' ' + s.name; }), [['ORG', S.map(function (s) { return s.org; })], ['Cumulative', S.map(function (s) { return s.cum; })]]),
+    return { title: 'Expenditure - Sections', kpis: [['ORG 2026-27', f2(sum(S, 'org'))], ['Cumulative 2026-27', f2(sum(S, 'cum')), 'g'], [LB().ly, f2(sum(S, 'ly'))], ['Change vs last year', '<span class="' + yoyCls(sum(S, 'cum'), sum(S, 'ly')) + '">' + yoyTxt(sum(S, 'cum'), sum(S, 'ly')) + '</span>', 'a']],
+      chart: barCfg(S.map(function (s) { return s.code + ' ' + s.name; }), [['ORG 2026-27', S.map(function (s) { return s.org; }), PAL[0]], [LB().ly, S.map(function (s) { return s.ly; }), PAL[7]], ['Cumulative 2026-27', S.map(function (s) { return s.cum; }), PAL[1]]]),
       onChart: function (i) { push(S[i].name, function () { return vHeads(S[i]); }); },
-      head: '<th>Section</th><th class="num">ORG</th><th class="num">Cum.</th><th>% ORG</th>',
-      rows: S.map(function (s) { return '<td>' + esc(s.code + ' - ' + s.name) + '</td><td class="num">' + f2(s.org) + '</td><td class="num">' + f2(s.cum) + '</td><td>' + bar(pct(s.cum, s.org)) + '<small>' + pct(s.cum, s.org) + '%</small></td>'; }),
+      head: '<th>Section</th><th class="num">ORG</th><th class="num">Last yr</th><th class="num">Cum.</th><th class="num">YoY</th><th>% ORG</th>',
+      rows: S.map(function (s) { return '<td>' + esc(s.code + ' - ' + s.name) + '</td><td class="num">' + f2(s.org) + '</td><td class="num">' + f2(s.ly) + '</td><td class="num">' + f2(s.cum) + '</td><td class="num ' + yoyCls(s.cum, s.ly) + '">' + yoyTxt(s.cum, s.ly) + '</td><td>' + bar(pct(s.cum, s.org)) + '<small>' + pct(s.cum, s.org) + '%</small></td>'; }),
       onRow: function (i) { push(S[i].name, function () { return vHeads(S[i]); }); } };
   }
   function vHeads(s) {
     var H = s.heads;
-    return { title: s.name + ' - Plan Heads', kpis: [['ORG', f2(s.org)], ['Cumulative', f2(s.cum), 'g'], ['% on ORG', pct(s.cum, s.org) + '%', 'a'], ['Plan heads', H.length]],
-      chart: barCfg(H.map(function (h) { return 'PH-' + h.ph; }), [['ORG', H.map(function (h) { return h.org; })], ['Cumulative', H.map(function (h) { return h.cum; })]]),
+    return { title: s.name + ' - Plan Heads', kpis: [['ORG 2026-27', f2(s.org)], ['Cumulative 2026-27', f2(s.cum), 'g'], [LB().ly, f2(s.ly)], ['Change vs last year', '<span class="' + yoyCls(s.cum, s.ly) + '">' + yoyTxt(s.cum, s.ly) + '</span>', 'a']],
+      chart: barCfg(H.map(function (h) { return 'PH-' + h.ph; }), [['ORG 2026-27', H.map(function (h) { return h.org; }), PAL[0]], [LB().ly, H.map(function (h) { return h.ly; }), PAL[7]], ['Cumulative 2026-27', H.map(function (h) { return h.cum; }), PAL[1]]]),
       onChart: function (i) { push('PH-' + H[i].ph, function () { return vWorks(H[i]); }); },
-      head: '<th>Plan head</th><th class="num">ORG</th><th class="num">RE(P)</th><th class="num">Cum.</th><th>% ORG</th>',
-      rows: H.map(function (h) { return '<td>PH-' + h.ph + ' ' + esc(h.name) + '</td><td class="num">' + f2(h.org) + '</td><td class="num">' + f2(h.re) + '</td><td class="num">' + f2(h.cum) + '</td><td>' + bar(pct(h.cum, h.org)) + '<small>' + pct(h.cum, h.org) + '%</small></td>'; }),
+      head: '<th>Plan head</th><th class="num">ORG</th><th class="num">Last yr</th><th class="num">Cum.</th><th class="num">YoY</th><th>% ORG</th>',
+      rows: H.map(function (h) { return '<td>PH-' + h.ph + ' ' + esc(h.name) + '</td><td class="num">' + f2(h.org) + '</td><td class="num">' + f2(h.ly) + '</td><td class="num">' + f2(h.cum) + '</td><td class="num ' + yoyCls(h.cum, h.ly) + '">' + yoyTxt(h.cum, h.ly) + '</td><td>' + bar(pct(h.cum, h.org)) + '<small>' + pct(h.cum, h.org) + '%</small></td>'; }),
       onRow: function (i) { push('PH-' + H[i].ph, function () { return vWorks(H[i]); }); } };
   }
   function vWorks(h) {
     var W = h.works, top = W.slice(0, 10);
-    return { title: 'PH-' + h.ph + ' ' + h.name + ' - Works', kpis: [['ORG', f2(h.org)], ['Cumulative', f2(h.cum), 'g'], ['Fund heads', h.funds.length], ['Works listed', W.length]],
-      chart: { type: 'bar', data: { labels: top.map(function (w) { return clip(w.name, 28); }), datasets: [{ label: 'Apr-Sep\'26 (Rs. Cr)', data: top.map(function (w) { return +sum(w.m).toFixed(2); }), backgroundColor: PIE[1] }] }, options: { indexAxis: 'y', plugins: { legend: { display: false } } } },
+    return { title: 'PH-' + h.ph + ' ' + h.name + ' - Works', kpis: [['ORG', f2(h.org)], ['Cumulative', f2(h.cum), 'g'], [LB().ly, f2(h.ly)], ['Works listed', W.length]],
+      chart: { type: 'bar', data: { labels: top.map(function (w) { return clip(w.name, 28); }), datasets: [{ label: 'Apr-Sep\'26 (Rs. Cr)', data: top.map(function (w) { return +sum(w.m).toFixed(2); }), backgroundColor: PAL[1] }] }, options: { indexAxis: 'y', plugins: { legend: { display: false } } } },
       onChart: function (i) { push(clip(top[i].name, 24), function () { return vWork(top[i]); }); },
       head: '<th>Work</th><th class="num">Sanct.</th><th class="num">Outlay</th><th class="num">Apr-Sep</th>',
       rows: W.length ? W.map(function (w) { return '<td>' + esc(clip((w.pb ? w.pb + ' | ' : '') + w.name, 70)) + '</td><td class="num">' + f2(w.sanc) + '</td><td class="num">' + f2(w.outlay) + '</td><td class="num">' + f2(sum(w.m)) + '</td>'; }) : ['<td class="text-muted">No work-wise data for this head</td>'],
@@ -81,9 +85,9 @@ $(function () {
   }
   function vWork(w) {
     return { title: (w.pb ? w.pb + ' - ' : '') + w.name, kpis: [['Fund', esc(w.fund || '-')], ['Sanctioned cost', f2(w.sanc)], ['Exp. to Mar\'26', f2(w.exp)], ['Outlay 2026-27', f2(w.outlay), 'a'], ['Apr-Sep\'26', f2(sum(w.m)), 'g'], ['2026-27 approx.', f2(w.yr)]],
-      chart: { type: 'bar', data: { labels: MON, datasets: [{ label: 'Monthly expenditure (Rs. Cr)', data: w.m, backgroundColor: PIE[0] }] }, options: { plugins: { legend: { display: false } } } } };
+      chart: { type: 'bar', data: { labels: MON, datasets: [{ label: 'Monthly expenditure (Rs. Cr)', data: w.m, backgroundColor: PAL[0] }] }, options: { plugins: { legend: { display: false } } } } };
   }
-  function barCfg(lab, ds) { return { type: 'bar', data: { labels: lab.map(function (l) { return clip(l, 26); }), datasets: ds.map(function (d, i) { return { label: d[0], data: d[1], backgroundColor: PIE[i] }; }) } }; }
+  function barCfg(lab, ds) { return { type: 'bar', data: { labels: lab.map(function (l) { return clip(l, 26); }), datasets: ds.map(function (d, i) { return { label: d[0], data: d[1], backgroundColor: d[2] || PAL[i] }; }) } }; }
 
   /* ---------- file views ---------- */
   function key(nm) {
@@ -135,8 +139,8 @@ $(function () {
     all.sort(function (a, b) { return sum(b.w.m) - sum(a.w.m); });
     var K = [
       { id: 'org', l: 'ORG 2026-27', v: f2(sum(S, 'org')), n: 'Rs. crore', go: vSections },
-      { id: 'cum', l: 'Cumulative exp.', v: f2(sum(S, 'cum')), n: pct(sum(S, 'cum'), sum(S, 'org')) + '% of ORG', c: 'g', go: vSections },
-      { id: 'sep', l: 'Sep\'26 to date', v: f2(sum(S, 'sep')), n: 'Rs. crore', c: 'a', go: vSections },
+      { id: 'cum', l: 'Cumulative exp.', v: f2(sum(S, 'cum')), n: pct(sum(S, 'cum'), sum(S, 'org')) + '% of ORG \u00b7 ' + yoyTxt(sum(S, 'cum'), sum(S, 'ly')) + ' vs last yr', c: 'g', go: vSections },
+      { id: 'sep', l: LB().month + ' to date', v: f2(sum(S, 'sep')), n: 'Rs. crore', c: 'a', go: vSections },
       { id: 'fil', l: 'Files pending', v: f0(sum(T, 'cb')), n: 'closing balance', c: 'r', go: vFileSecs },
       { id: 'aud', l: 'Audit outstanding', v: f0(at.cb), n: 'paras & notes', c: 'a', go: function () { return vAudit(at); } },
       { id: 'rb', l: 'RB Inspection paras', v: D.rb.length, n: 'pending', c: 'r', go: function () { return vRbList(); } }];
@@ -145,11 +149,11 @@ $(function () {
     });
     function vRbList() { return { title: 'RB Inspection Report - pending paras', kpis: [['Paras', D.rb.length, 'r']], head: '<th>Para</th><th>Section</th><th>Since</th>', rows: D.rb.map(function (r) { return '<td>' + esc(r.para) + '</td><td>' + esc(r.sec) + '</td><td>' + esc(r.since) + '</td>'; }), onRow: function (i) { push('Para ' + D.rb[i].para, function () { return vRb(D.rb[i]); }); } }; }
 
-    draw('cSec', barCfg(S.map(function (s) { return s.code + ' ' + s.name.split(' ')[0]; }), [['ORG', S.map(function (s) { return s.org; })], ['Cumulative', S.map(function (s) { return s.cum; })]]),
+    draw('cSec', barCfg(S.map(function (s) { return s.code + ' ' + s.name.split(' ')[0]; }), [['ORG 2026-27', S.map(function (s) { return s.org; }), PAL[0]], [LB().ly, S.map(function (s) { return s.ly; }), PAL[7]], ['Cumulative 2026-27', S.map(function (s) { return s.cum; }), PAL[1]]]),
       function (i) { open([{ l: 'Sections', f: vSections }, { l: S[i].name, f: function () { return vHeads(S[i]); } }]); });
-    var HP = []; S.forEach(function (s) { s.heads.forEach(function (h) { if (h.cum > 0) HP.push({ s: s, h: h }); }); });
+    var HP = []; S.forEach(function (s) { s.heads.forEach(function (h) { if (h.cum > 0 || h.ly > 0) HP.push({ s: s, h: h }); }); });
     HP.sort(function (a, b) { return b.h.cum - a.h.cum; });
-    draw('cPh', { type: 'bar', data: { labels: HP.map(function (x) { return 'PH-' + x.h.ph + ' ' + x.s.code; }), datasets: [{ label: 'Cumulative (Rs. Cr)', data: HP.map(function (x) { return x.h.cum; }), backgroundColor: HP.map(function (x) { return PAL[x.s.code.charCodeAt(0) - 65]; }) }] }, options: { plugins: { legend: { display: false } } } },
+    draw('cPh', { type: 'bar', data: { labels: HP.map(function (x) { return 'PH-' + x.h.ph + ' ' + x.s.code; }), datasets: [{ label: LB().ly, data: HP.map(function (x) { return x.h.ly; }), backgroundColor: PAL[7] }, { label: 'Cumulative 2026-27', data: HP.map(function (x) { return x.h.cum; }), backgroundColor: PAL[1] }] } },
       function (i) { var x = HP[i]; open([{ l: 'Sections', f: vSections }, { l: x.s.name, f: function () { return vHeads(x.s); } }, { l: 'PH-' + x.h.ph, f: function () { return vWorks(x.h); } }]); });
     var TW = all.slice(0, 8);
     tbl('#tWorks', '<th>Work</th><th>Section / PH</th><th class="num">Sanct. cost</th><th class="num">Outlay 26-27</th><th class="num">Apr-Sep\'26</th><th>Utilisation</th>', TW.map(function (x) {
@@ -168,7 +172,7 @@ $(function () {
 
     var RS = {}; D.rb.forEach(function (r) { RS[r.sec] = (RS[r.sec] || 0) + 1; });
     var RK = Object.keys(RS);
-    draw('cRb', { type: 'bar', data: { labels: RK, datasets: [{ data: RK.map(function (k) { return RS[k]; }), backgroundColor: PIE[3] }] }, options: { indexAxis: 'y', plugins: { legend: { display: false } } } }, function (i) {
+    draw('cRb', { type: 'bar', data: { labels: RK, datasets: [{ data: RK.map(function (k) { return RS[k]; }), backgroundColor: PAL[3] }] }, options: { indexAxis: 'y', plugins: { legend: { display: false } } } }, function (i) {
       var L = D.rb.filter(function (r) { return r.sec === RK[i]; });
       open([{ l: 'RB Inspection - ' + RK[i], f: function () { return { title: 'Paras pending with ' + RK[i], kpis: [['Paras', L.length, 'r']], head: '<th>Para</th><th>Since</th><th>Remarks</th>', rows: L.map(function (r) { return '<td>' + esc(r.para) + '</td><td>' + esc(r.since) + '</td><td class="small">' + esc(clip(r.rem, 120)) + '</td>'; }), onRow: function (j) { push('Para ' + L[j].para, function () { return vRb(L[j]); }); } }; } }]);
     });
